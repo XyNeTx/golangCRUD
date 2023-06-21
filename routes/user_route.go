@@ -13,6 +13,7 @@ func UserRoute(app *fiber.App) {
 	if err != nil {
 		log.Fatal("cannot load config:", err)
 	}
+	app.Get(config.APIURL+"/verify", controllers.GetValidToken)
 	app.Get(config.APIURL+"/user/:userId", controllers.GetUser)
-	app.Post(config.APIURL+"/user", controllers.CreateUser)
+	// app.Post(config.APIURL+"/user", controllers.CreateUser)
 }
