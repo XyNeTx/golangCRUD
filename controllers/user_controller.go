@@ -2,7 +2,7 @@ package controllers
 
 import (
 	"context"
-	"fmt"
+	"log"
 	"net/http"
 	"time"
 	"uplevel-api/configs"
@@ -26,17 +26,26 @@ func GetUser(c *fiber.Ctx) error {
 	// }
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	userId := c.Params("userId")
-	var user models.User
 	defer cancel()
+	// pipeline := []bson.M{
+	// 	bson.M{"$match": bson.M{"userId": userId}},
+	// }
+	pipeline := []bson.M{
+		{"$match": bson.M{"userId": userId}},
+	}
+	cursor, err := userCollection.Aggregate(ctx, pipeline)
 
-	objId, _ := primitive.ObjectIDFromHex(userId)
-	fmt.Println(userId)
-	err := userCollection.FindOne(ctx, bson.M{"id": objId}).Decode(&user)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(responses.UserResponse{Status: http.StatusInternalServerError, Message: "error", Data: &fiber.Map{"data": err.Error()}})
 	}
+	var results []bson.M
+	if err := cursor.All(ctx, &results); err != nil {
+		log.Fatal(err)
+	}
 
-	return c.Status(http.StatusOK).JSON(responses.UserResponse{Status: http.StatusOK, Message: "success", Data: &fiber.Map{"data": user}})
+	return c.Status(http.StatusOK).JSON(
+		responses.UserResponse{Status: http.StatusOK, Message: "success", Data: &fiber.Map{"data": results}},
+	)
 }
 
 func CreateUser(c *fiber.Ctx) error {
@@ -55,10 +64,8 @@ func CreateUser(c *fiber.Ctx) error {
 	}
 
 	newUser := models.User{
-		Id:       primitive.NewObjectID(),
-		Name:     user.Name,
-		Location: user.Location,
-		Title:    user.Title,
+		Id:     primitive.NewObjectID(),
+		UserId: user.UserId,
 	}
 
 	result, err := userCollection.InsertOne(ctx, newUser)
