@@ -24,6 +24,7 @@ func main() {
 
 	// routes
 	routes.UserRoute(app)
+	routes.OrganizationRoute(app)
 
 	app.Listen(config.ServerAddress)
 }
