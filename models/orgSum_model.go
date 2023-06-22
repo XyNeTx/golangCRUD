@@ -10,11 +10,12 @@ type Member struct {
 }
 
 type MyOrg struct {
-	Name    string             `json:"name,omitempty" bson:"name,omitempty"`
-	Picture string             `json:"picture,omitempty" bson:"picture,omitempty"`
-	Member  []Member           `json:"members,omitempty" bson:"members,omitempty"`
-	Share   bool               `json:"share,omitempty" bson:"share,omitempty"`
-	Id      primitive.ObjectID `json:"id,omitempty" bson:"_id,omitempty"`
+	AllOrgs `bson:",inline"`
+	// Name    string             `json:"name,omitempty" bson:"name,omitempty"`
+	// Picture string             `json:"picture,omitempty" bson:"picture,omitempty"`
+	// Member  []Member           `json:"members,omitempty" bson:"members,omitempty"`
+	Share bool `json:"share,omitempty" bson:"share,omitempty"`
+	// Id      primitive.ObjectID `json:"id,omitempty" bson:"_id,omitempty"`
 }
 type AllOrgs struct {
 	Name    string             `json:"name,omitempty" bson:"name,omitempty"`
@@ -23,9 +24,12 @@ type AllOrgs struct {
 	Id      primitive.ObjectID `json:"id,omitempty" bson:"_id,omitempty"`
 }
 type CreateOrg struct {
-	Name    string             `json:"name,omitempty" validate:"require"`
-	Picture string             `json:"picture,omitempty"`
-	Id      primitive.ObjectID `json:"id,omitempty"`
+	Name      string             `json:"name,omitempty" validateOrg:"require"`
+	Picture   string             `json:"picture,omitempty"`
+	Member    []Member           `json:"members,omitempty" bson:"members,omitempty"`
+	PowerUser []Member           `json:"powerUser,omitempty" bson:"powerUser,omitempty"`
+	Verifier  []Member           `json:"verifier,omitempty" bson:"verifier,omitempty"`
+	Id        primitive.ObjectID `json:"id,omitempty" bson:"_id,omitempty"`
 }
 type OrgSummary struct {
 	Counts     primitive.A `json:"counts,omitempty" bson:"counts,omitempty"`

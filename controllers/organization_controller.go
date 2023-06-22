@@ -121,8 +121,11 @@ func CreateOrg(c *fiber.Ctx) error {
 	}
 
 	newOrg := models.CreateOrg{
-		Id:   primitive.NewObjectID(),
-		Name: org.Name,
+		Id:        primitive.NewObjectID(),
+		Name:      org.Name,
+		Member:    org.Member,
+		Verifier:  org.Verifier,
+		PowerUser: org.PowerUser,
 	}
 
 	result, err := orgCollection.InsertOne(ctx, newOrg)
@@ -131,4 +134,42 @@ func CreateOrg(c *fiber.Ctx) error {
 	}
 
 	return c.Status(http.StatusCreated).JSON(responses.CreateOrgResponse{Status: http.StatusCreated, Message: "success", Data: result})
+}
+
+func EditOrg(c *fiber.Ctx) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	organizationId := c.Params("organizationId")
+	var editOrg models.CreateOrg
+	defer cancel()
+
+	objId, _ := primitive.ObjectIDFromHex(organizationId)
+
+	//validate the request body
+	if err := c.BodyParser(&editOrg); err != nil {
+		return c.Status(http.StatusBadRequest).JSON(responses.CreateOrgResponse{Status: http.StatusBadRequest, Message: "error", Data: nil})
+	}
+
+	//use the validator library to validate required fields
+	if validationErr := validate.Struct(&editOrg); validationErr != nil {
+		return c.Status(http.StatusBadRequest).JSON(responses.CreateOrgResponse{Status: http.StatusBadRequest, Message: "error", Data: nil})
+	}
+
+	update := bson.M{"name": editOrg.Name, "picture": editOrg.Picture, "members": editOrg.Member, "powerUser": editOrg.PowerUser, "verifier": editOrg.Verifier}
+
+	result, err := orgCollection.UpdateOne(ctx, bson.M{"_id": objId}, bson.M{"$set": update})
+
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(responses.CreateOrgResponse{Status: http.StatusInternalServerError, Message: "error", Data: nil})
+	}
+	//get updated user details
+	var updatedOrg models.CreateOrg
+	if result.MatchedCount == 1 {
+		err := orgCollection.FindOne(ctx, bson.M{"_id": objId}).Decode(&updatedOrg)
+
+		if err != nil {
+			return c.Status(http.StatusInternalServerError).JSON(responses.CreateOrgResponse{Status: http.StatusInternalServerError, Message: "error", Data: nil})
+		}
+	}
+
+	return c.Status(http.StatusOK).JSON(responses.CreateOrgResponse{Status: http.StatusOK, Message: "success", Data: updatedOrg})
 }
