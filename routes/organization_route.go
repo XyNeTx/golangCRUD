@@ -16,5 +16,5 @@ func OrganizationRoute(app *fiber.App) {
 	// app.Get(config.APIURL+"/:organizationId/summary", controllers.g)
 	app.Get(config.APIURL+"/organization/:userId", controllers.GetMyOrg)
 	app.Get(config.APIURL+"/organization/", controllers.GetAllOrgs)
-	app.Post(config.APIURL+"/organization/new", controllers.CreateOrg)
+	app.Post(config.APIURL+"/organization/", controllers.CreateOrg)
 }
