@@ -13,9 +13,10 @@ func OrganizationRoute(app *fiber.App) {
 	if err != nil {
 		log.Fatal("cannot load config:", err)
 	}
-	// app.Get(config.APIURL+"/:organizationId/summary", controllers.g)
+	app.Get(config.APIURL+"/:organizationId/summary", controllers.GetOrgSummary)
 	app.Get(config.APIURL+"/organization/:userId", controllers.GetMyOrg)
 	app.Get(config.APIURL+"/organization/", controllers.GetAllOrgs)
 	app.Post(config.APIURL+"/organization/:userId", controllers.CreateOrg)
 	app.Patch(config.APIURL+"/organization/:organizationId", controllers.EditOrg)
+	app.Delete(config.APIURL+"/organization/:organizationId", controllers.DeleteOrg)
 }

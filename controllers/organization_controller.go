@@ -19,35 +19,35 @@ var orgCollection *mongo.Collection = configs.GetCollection(configs.DB, "organiz
 var ideaCollection *mongo.Collection = configs.GetCollection(configs.DB, "ideas")
 var validateOrg = validator.New()
 
-// func GetOrgSummary(c *fiber.Ctx) error {
-// 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-// 	defer cancel()
-// 	var orgSummary []models.OrgSummary
-// 	organizationId := c.Params("organizationId")
-// 	// userID, err := primitive.ObjectIDFromHex(userId)
-// 	pipeline := []bson.M{
-// 		{"$match": bson.M{"organizationId": organizationId}},
-// 	}
-// 	results, err := ideaCollection.Aggregate(ctx, pipeline)
+func GetOrgSummary(c *fiber.Ctx) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	var orgSummary []models.OrgSummary
+	organizationId := c.Params("organizationId")
+	// userID, err := primitive.ObjectIDFromHex(userId)
+	pipeline := []bson.M{
+		{"$match": bson.M{"organizationId": organizationId}},
+	}
+	results, err := ideaCollection.Aggregate(ctx, pipeline)
 
-// 	if err != nil {
-// 		return c.Status(http.StatusInternalServerError).JSON(responses.OrgSummaryResponse{Status: http.StatusInternalServerError, Message: "error", Data: nil})
-// 	}
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(responses.OrgSummaryResponse{Status: http.StatusInternalServerError, Message: "error", Data: nil})
+	}
 
-// 	defer results.Close(ctx)
+	defer results.Close(ctx)
 
-// 	if err := results.All(ctx, &orgSummary); err != nil {
-// 		return c.Status(http.StatusInternalServerError).JSON(responses.OrgSummaryResponse{
-// 			Status:  http.StatusInternalServerError,
-// 			Message: "error",
-// 			Data:    nil,
-// 		})
-// 	}
+	if err := results.All(ctx, &orgSummary); err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(responses.OrgSummaryResponse{
+			Status:  http.StatusInternalServerError,
+			Message: "error",
+			Data:    nil,
+		})
+	}
 
-// 	return c.Status(http.StatusOK).JSON(
-// 		responses.MyOrgResponse{Status: http.StatusOK, Message: "success", Data: orgSummary},
-// 	)
-// }
+	return c.Status(http.StatusOK).JSON(
+		responses.OrgSummaryResponse{Status: http.StatusOK, Message: "success", Data: orgSummary},
+	)
+}
 
 func GetMyOrg(c *fiber.Ctx) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -172,4 +172,26 @@ func EditOrg(c *fiber.Ctx) error {
 	}
 
 	return c.Status(http.StatusOK).JSON(responses.CreateOrgResponse{Status: http.StatusOK, Message: "success", Data: updatedOrg})
+}
+func DeleteOrg(c *fiber.Ctx) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	organizationId := c.Params("organizationId")
+	defer cancel()
+
+	objId, _ := primitive.ObjectIDFromHex(organizationId)
+
+	result, err := orgCollection.DeleteOne(ctx, bson.M{"_id": objId})
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(responses.CreateOrgResponse{Status: http.StatusInternalServerError, Message: "error", Data: nil})
+	}
+
+	if result.DeletedCount < 1 {
+		return c.Status(http.StatusNotFound).JSON(
+			responses.CreateOrgResponse{Status: http.StatusNotFound, Message: "error", Data: nil},
+		)
+	}
+
+	return c.Status(http.StatusOK).JSON(
+		responses.CreateOrgResponse{Status: http.StatusOK, Message: "User successfully deleted!", Data: nil},
+	)
 }
