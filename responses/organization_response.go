@@ -20,7 +20,9 @@ type CreateOrgResponse struct {
 	Data    interface{} `json:"details"`
 }
 type OrgSummaryResponse struct {
-	Status  int                 `json:"status"`
-	Message string              `json:"message"`
-	Data    []models.OrgSummary `json:"details"`
+	Status  int                  `json:"status"`
+	Message string               `json:"message"`
+	Counts  []models.StatusCount `json:"counts"`
+	Benefit int32                `json:"totalBenefits"`
+	Data    []models.OrgSummary  `json:"-"`
 }
