@@ -1,9 +1,15 @@
 package responses
 
-import "github.com/gofiber/fiber/v2"
+import "uplevel-api/models"
 
 type UserResponse struct {
-	Status  int        `json:"status"`
-	Message string     `json:"message"`
-	Data    *fiber.Map `json:"data"`
+	Status  int          `json:"status"`
+	Message string       `json:"message"`
+	Data    *models.User `json:"details"`
+}
+
+type AccessTokenResponse struct {
+	Status  int                 `json:"status"`
+	Message string              `json:"message"`
+	Data    *models.AccessToken `json:"details"`
 }

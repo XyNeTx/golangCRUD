@@ -1,7 +1,6 @@
 package main
 
 import (
-	"log"
 	"uplevel-api/configs"
 	"uplevel-api/routes"
 
@@ -9,10 +8,7 @@ import (
 )
 
 func main() {
-	config, err := configs.LoadConfig(".")
-	if err != nil {
-		log.Fatal("cannot load config:", err)
-	}
+	config := configs.AppConfig
 	app := fiber.New()
 
 	app.Get("/", func(c *fiber.Ctx) error {
@@ -24,6 +20,7 @@ func main() {
 
 	// routes
 	routes.UserRoute(app)
+	routes.OrganizationRoute(app)
 
 	app.Listen(config.ServerAddress)
 }
